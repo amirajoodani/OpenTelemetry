@@ -54,4 +54,72 @@ Having dedicated systems for logs, metrics, and traces is why we commonly refer 
 
 There are different categories of telemetry
 Each pillar has its own unique strengths and stands on its own
-Pillars are complementary and must be combined to form a stable foundation for achieving observability
+Pillars are complementary and must be combined to form a stable foundation for achieving observability. <br>
+
+
+# Siloed Telemetry is Difficult to Work With
+ 
+
+The need for correlated telemetry using the signals of OpenTelemetry
+
+The Need for Correlated Telemetry
+<img width="746" height="321" alt="5" src="https://github.com/user-attachments/assets/a384d8c1-ef39-4eed-84fd-0c0c443ca93f" /> <br>
+
+
+ 
+
+First, there are deficits in the quality of telemetry data. To illustrate this, let’s imagine that we want to investigate the root cause of a problem. The first indicator of a problem is usually an alert or an anomaly in a metrics dashboard. To confirm the incident is worth investigating, we have to form an initial hypothesis. The only information we currently have is that something happened at a particular point in time. Therefore, the first step is to use the metrics system to look for other metrics showing temporally correlated, abnormal behavior.
+
+After making an educated guess about the problem, we want to drill down and investigate the root cause of the problem. To gain additional information, we typically switch to the logging system. Here, we write queries and perform extensive filtering to find log events related to suspicious metrics.
+
+After discovering log events of interest, we often want to know about the larger context in which the operation took place. Unfortunately, traditional logging systems lack the mechanisms to reconstruct the chain of events in that particular transaction. Traditional logging systems often fail to capture the full context of an operation, making it difficult to correlate events across different services or components. They frequently lack the ability to preserve critical metadata, such as trace IDs or span IDs, which are essential for linking related events together. This limitation results in fragmented views of the system’s behavior, where the story of a single operation is spread across multiple logs without a clear narrative. Furthermore, the absence of standardized query languages or interfaces adds to the difficulty of searching and analyzing logs effectively, as operators must rely on custom scripts or manual filtering to uncover patterns and anomalies.
+
+If we switch our perspectives from someone building an observability solution to someone using it, an inherent disconnect is revealed. The real world isn’t made up of logging, metrics, or tracing problems. Instead, we have to move back and forth between different types of telemetry to build up a mental model and reason about the behavior of a system. Since observability tools are silos of disconnected data, figuring out how pieces of information relate to one another causes a significant cognitive load for the operator. <br>
+
+# Lack of Instrumentation Standard Leads to Low Quality Data
+Another factor that makes root-cause analysis hard is that telemetry data often suffers from a lack of consistency. This leads to difficulties in correlating events across different services or components, as there is no standardized way to identify related events, such as through trace IDs or span IDs. Additionally, there is no straightforward method to integrate multiple solution-specific logging libraries into a coherent system, resulting in fragmented and disjointed views of the system’s behavior.
+
+# No Built-in Instrumentation in Open Source Software
+Let’s look at this from the perspective of open source software developers. Today, most applications are built on top of open source libraries, frameworks, and standalone components. With a majority of work being performed outside the business logic of the application developer, it is crucial to collect telemetry from open source components. The people with the most knowledge of what is important when operating a piece of software are the developers and maintainers themselves. However, there is currently no good way to communicate through native instrumentation.
+
+One option would be to pick the instrumentation of an observability solution. However, this would add additional dependencies to the project and force users to integrate it into their systems. While running multiple logging and metrics systems is impractical but technically possible, tracing is outright impossible as it requires everyone to agree on a standard for trace context propagation to work.
+
+A common strategy for solving problems in computer science is to add a layer of indirection. Instead of embedding vendor-specific instrumentation, open source developers often provide observability hooks. This allows users to write adapters that connect the open source component to their observability system. While this approach provides greater flexibility, it also has its fair share of problems. For example, whenever there is a new version of software, users have to notice and update their adapters. Moreover, the indirection also increases the overhead, as we have to convert between different telemetry formats.
+
+# Combining Telemetry Generation with Results in Vendor Lock-in
+Let’s put on the hat of an end user. After committing to a solution, the application contains many solution-specific library calls throughout its codebase. To switch to another observability tool down the line, we would have to rip out and replace all existing instrumentation and migrate our analysis tooling. This upfront cost of re-instrumentation makes migration difficult, which is a form of vendor lock-in.
+
+# Struggling Observability Vendors / High Barrier for Entry
+The last part of the equation is the observability vendors themselves. At first glance, vendors appear to be the only ones profiting from the current situation. In the past, high-quality instrumentation was a great way to differentiate yourself from the competition. Moreover, since developing integrations for loads of pre-existing software is expensive, the observability market has a relatively high barrier to entry.
+
+With customers shying away from expensive re-instrumentation, established vendors have faced less competition and pressure to innovate. However, they are also experiencing major pain points. The rate at which software is being developed has increased exponentially over the last decade. Today’s heterogeneous software landscape makes it impossible to maintain instrumentation for every library, framework, and component. As soon as a vendor starts struggling with supplying instrumentation, customers will start refusing to adopt their product. As a result, solutions compete over who can build the best n-to-n format converter instead of investing these resources into creating great analysis tools. Another downside is that converting data that was generated by foreign sources often leads to a degradation in the quality of telemetry. Once data is no longer well-defined, it becomes harder to analyze.
+
+# What is OpenTelemetry (in a nutshell)?
+OpenTelemetry (OTel) is an open source project designed to provide standardized tools and APIs for generating, collecting, and exporting telemetry data such as traces, metrics, and logs. It aims to give developers deep visibility into applications, helping to monitor, troubleshoot, and optimize software systems.
+
+The main goals of OpenTelemtry are:
+
+Unified telemetry: Combines tracing, logging, and metrics into a single framework enabling correlation of all data and establishing an open standard for telemetry data.
+Vendor-neutrality: Integration with different backends for processing the data.
+Cross-platform: Supports various languages (Java, Python, Go, etc.) and platforms, making it versatile for different development environments.
+
+# What OpenTelemetry is NOT
+Often it is helpful to define something by what it is not. 
+
+OpenTelemetry is:
+
+Not an All-in-One Monitoring or Observability Tool
+OpenTelemetry doesn't replace full-fledged monitoring or observability platforms like Datadog, New Relic, or Prometheus. Instead, it helps collect and standardize telemetry data (traces, metrics, logs) so that you can send it to these tools for visualization and analysis.
+
+Not a Data Storage or Dashboarding Solution
+OpenTelemetry doesn’t store or visualize data. It focuses on the collection and export of telemetry data to external systems that handle storage and presentation, such as Grafana, Jaeger, or Prometheus.
+
+Not a Pre-configured Monitoring Tool
+OpenTelemetry is a toolkit for collecting and exporting data, but it requires configuration and integration with other systems. It doesn’t automatically provide out-of-the-box monitoring or alerting functionality.
+
+Not a Performance Optimizer
+While OpenTelemetry helps you collect detailed performance data, it doesn’t automatically optimize application performance. It's a diagnostic tool that helps you gather insights for manual tuning.
+In essence, OpenTelemetry is an integration and standardization tool for telemetry data, not an all-in-one solution for monitoring, logging, or performance management. It complements other tools by standardizing the data collection process. <br>
+
+
+
