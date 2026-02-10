@@ -168,3 +168,22 @@ manual or code-based instrumentation (for fine-grained control, deeply embedded 
 For now, let’s skip further details and focus on why OpenTelemetry decided to separate the API from the SDK. On startup, the application registers a provider for every type of signal. After that, calls to the API are forwarded to the respective provider. If we don’t explicitly register one, OpenTelemetry will use a fallback provider that translates API calls into no-ops.
 
 The primary reason for separating the API from the SDK is that it makes it easier to embed native instrumentation into open source library code. OpenTelemetry’s API is designed to be lightweight and safe to depend on. The signal’s implementation provided by the SDK is significantly more complex and likely contains dependencies on other software. Forcing these dependencies on users could lead to conflicts with their particular software stack. Registering a provider during the initial setup allows users to resolve dependency conflicts by choosing a different implementation. Furthermore, it allows us to ship software with built-in observability without forcing the runtime cost of instrumentation onto users that don’t need it.
+
+# Telemetry Processor (Standalone Component)
+ 
+
+Collecting, Processing and forwarding of telemetry data to backends like time-series databases, log databases and tracing databases
+<img width="1122" height="475" alt="8" src="https://github.com/user-attachments/assets/d83fd79d-856e-4b2e-a256-1256dda5c253" /> <br>
+
+
+So far, we have seen that OpenTelemetry provides tooling for vendor-agnostic instrumentation to application and library developers. This alone marks a significant milestone, but OpenTelemetry’s framework goes much further. After generating and emitting telemetry, operators are responsible for managing and ingesting it into the respective backends. This includes tasks such as:
+
+gathering data from various sources
+parsing and converting it for downstream processing
+enrichment with additional metadata
+filtering out irrelevant data to reduce noise and storage requirements
+normalization and applying transformations
+buffering for resilience and performance
+routing to steer subsets of telemetry to different destinations
+forwarding to backends
+To build and configure such telemetry pipelines, operations teams often deploy additional infrastructure. A popular example is the fluentbit telemetry agents. Similarly, OpenTelemetry provides a standalone component with these capabilities: the OpenTelemetry Collector.
