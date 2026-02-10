@@ -121,5 +121,24 @@ Not a Performance Optimizer
 While OpenTelemetry helps you collect detailed performance data, it doesn’t automatically optimize application performance. It's a diagnostic tool that helps you gather insights for manual tuning.
 In essence, OpenTelemetry is an integration and standardization tool for telemetry data, not an all-in-one solution for monitoring, logging, or performance management. It complements other tools by standardizing the data collection process. <br>
 
+# Signal Specification (Language-Agnostic)
+On a high level, OpenTelemetry is organized into signals, which mainly include tracing, metrics and logging. Every signal is developed as a standalone component (but there are ways to connect data streams to one another). Signals are defined inside OpenTelemetry’s language-agnostic specification, which lies at the very heart of the project. The end-user probably won’t come into direct contact with the specification, but it plays a vital role in ensuring consistency and interoperability within the OpenTelemetry ecosystem.
 
+ 
+
+The OpenTelemetry Specification showing the three signals: tracing, metrics and logs with their respective API specification, SDK specification and data conventions with OTLP and semantic conventions
+ <img width="1001" height="465" alt="6" src="https://github.com/user-attachments/assets/fca78a39-b45a-4eac-9a38-b23c66847660" /> <br>
+
+
+The specification consists of three parts. First, there are definitions of terms that establish a common vocabulary and shared understanding to avoid confusion. Second, it specifies the technical details of how each signal is designed. This includes:
+
+an API specification (see Tracing API, Metrics API, and OpenTelemetry Logging)
+defines (conceptual) interfaces that implementations must adhere to
+ensures that implementations are compatible with each other
+includes the methods that can be used to generate, process, and export telemetry data
+an SDK specification (see Tracing SDK, Metrics SDK, Logs SDK)
+serves as a guide for developers
+defines requirements that a language-specific implementation of the API must meet to be compliant
+includes concepts around the configuration, processing, and exporting of telemetry data
+Besides signal architecture, the specification also covers aspects related to telemetry data. For example, OpenTelemetry defines semantic conventions. By pushing for consistency in the naming and interpretation of common telemetry metadata, OpenTelemetry aims to reduce the need to normalize data coming from different sources. Finally, there is also the OpenTelemetry Protocol (OTLP), which we’ll cover later in the chapter.
 
