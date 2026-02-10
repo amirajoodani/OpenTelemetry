@@ -142,3 +142,29 @@ defines requirements that a language-specific implementation of the API must mee
 includes concepts around the configuration, processing, and exporting of telemetry data
 Besides signal architecture, the specification also covers aspects related to telemetry data. For example, OpenTelemetry defines semantic conventions. By pushing for consistency in the naming and interpretation of common telemetry metadata, OpenTelemetry aims to reduce the need to normalize data coming from different sources. Finally, there is also the OpenTelemetry Protocol (OTLP), which we’ll cover later in the chapter.
 
+# Vendor-Agnostic, Language-Specific Instrumentation
+ 
+
+Generate and emit telemetry signals via the OTel API and SDK packages from multiple programming languages
+<img width="1099" height="707" alt="7" src="https://github.com/user-attachments/assets/a1fefeee-6e3e-4c89-a82a-86e696925d29" /> <br>
+
+
+To generate and emit telemetry from applications, we use language-specific implementations, which adhere to OpenTelemetry’s specification. OpenTelemetry supports a wide-range of popular programming languages at varying levels of maturity. The implementation of a signal consists of two parts:
+
+API
+defines the interfaces and constants outlined in the specification
+used by application and library developers for vendor-agnostic instrumentation
+refers to a no-op implementation by default
+SDK
+provider implements the OpenTelemetry API
+contains the actual logic to generate, process and emit telemetry
+OpenTelemetry ships with official providers that serve as the reference implementation (commonly referred to as the SDK)
+it is possible to write your own
+Generally speaking, we use the OpenTelemetry API to add instrumentation to our source code. In practice, this can be achieved in various ways, such as:
+
+zero-code or automatic instrumentation (if available and to avoid code changes)
+instrumentation libraries that provide simplified OpenTelemetry integration (which may or may not require code changes)
+manual or code-based instrumentation (for fine-grained control, deeply embedded in the code)
+For now, let’s skip further details and focus on why OpenTelemetry decided to separate the API from the SDK. On startup, the application registers a provider for every type of signal. After that, calls to the API are forwarded to the respective provider. If we don’t explicitly register one, OpenTelemetry will use a fallback provider that translates API calls into no-ops.
+
+The primary reason for separating the API from the SDK is that it makes it easier to embed native instrumentation into open source library code. OpenTelemetry’s API is designed to be lightweight and safe to depend on. The signal’s implementation provided by the SDK is significantly more complex and likely contains dependencies on other software. Forcing these dependencies on users could lead to conflicts with their particular software stack. Registering a provider during the initial setup allows users to resolve dependency conflicts by choosing a different implementation. Furthermore, it allows us to ship software with built-in observability without forcing the runtime cost of instrumentation onto users that don’t need it.
