@@ -186,4 +186,19 @@ normalization and applying transformations
 buffering for resilience and performance
 routing to steer subsets of telemetry to different destinations
 forwarding to backends
-To build and configure such telemetry pipelines, operations teams often deploy additional infrastructure. A popular example is the fluentbit telemetry agents. Similarly, OpenTelemetry provides a standalone component with these capabilities: the OpenTelemetry Collector.
+To build and configure such telemetry pipelines, operations teams often deploy additional infrastructure. A popular example is the fluentbit telemetry agents. Similarly, OpenTelemetry provides a standalone component with these capabilities: the OpenTelemetry Collector.<br>
+
+# Wire Protocol
+Completing the standardization, generation, and management package, OpenTelemetry also defines how to transport telemetry between producers, agents, and backends.
+
+The OpenTelemetry Protocol (OTLP) is an open source and vendor-neutral wire format that defines:
+
+how data is encoded in memory
+a protocol to transport that data across the network
+As a result, OTLP is used throughout the observability stack. Emitting telemetry in OLTP means that instrumented applications and third-party services are compatible with countless observability solutions. The Collector supports receiving telemetry from and exporting to a various formats (e.g., Prometheus Metrics, Zipkin traces, etc.). However, OTLP is generally preferred because the Collector uses it internally to represent and process telemetry. Thereby, we avoid the cost of converting between formats and increase consistency. This is because the native format closely aligns with the ideas proposed by the framework (having attributes follow semantic conventions, cross-signal correlation, etc.).
+
+Similarly, most observability backends support OTLP right out of the box. Given the rapid adoption of OpenTelemetry, integrating with OTLP automatically gives you access to a broad audience of potential users. Moreover, an open and vendor-neutral telemetry protocol means less work for developers of observability tools. Before, you had to develop countless adapters to be able to ingest data arriving in various proprietary formats. In other words, OTLP is a significant push for interoperability between tools and services in the observability ecosystem.
+
+OTLP offers three transport mechanisms for transmitting telemetry data: HTTP/1.1, HTTP/2, and gRPC. When using OTLP, the choice of transport mechanism depends on application requirements, considering factors such as performance, reliability, and security. OTLP data is often encoded using the Protocol Buffers (Protobuf) binary format, which is compact and efficient for network transmission and supports schema evolution, allowing for future changes to the data model without breaking compatibility. Data can also be encoded in the JSON file format, which allows for a human-readable format with the disadvantage of higher network traffic and larger file sizes.<br>
+
+
